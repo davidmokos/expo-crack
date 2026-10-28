@@ -2,7 +2,7 @@ import { NativeModule, requireOptionalNativeModule } from 'expo';
 
 import type { GlitchOptions } from './ExpoGlitch.types';
 
-declare class ExpoGlitchModule extends NativeModule<{}> {
+declare class ExpoGlitchModule extends NativeModule {
   setEnabled(enabled: boolean): void;
   isEnabled(): boolean;
   configure(options: GlitchOptions): void;

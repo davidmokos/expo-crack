@@ -41,7 +41,7 @@ function ensureKeyframes() {
   document.head.appendChild(style);
 }
 
-class ExpoGlitchModule extends NativeModule<{}> {
+class ExpoGlitchModule extends NativeModule {
   private style: Style = { ...DEFAULT_STYLE };
   private enabled = false;
   private root: HTMLDivElement | null = null;
