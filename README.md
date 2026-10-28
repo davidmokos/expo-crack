@@ -15,8 +15,11 @@ Rebuild your app and that's it. The line is on by default. No code, no setup, no
 </p>
 
 <p align="center">
-  <img src="./docs/android.png" alt="The example app on an Android emulator, with the same green line" width="240" />
+  <img src="./docs/duo-closed.png" alt="The same app on the closed iPhone Duo: no line on the outer display" width="300" />
+  &nbsp;&nbsp;
+  <img src="./docs/android.png" alt="The example app on an Android emulator, with the same green line" width="200" />
 </p>
+<p align="center"><sub>Closed Duo on the left: the line waits for you to open the phone. Android on the right: no hinge, no mercy.</sub></p>
 
 ## What you get
 
