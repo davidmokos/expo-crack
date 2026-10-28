@@ -24,6 +24,8 @@ struct GlitchStyle {
   var flicker: Bool = true
 }
 
+#if os(iOS)
+
 /// Owns the overlay window and keeps it attached to the active scene.
 final class GlitchOverlay {
   static let shared = GlitchOverlay()
@@ -329,6 +331,33 @@ final class GlitchLineView: UIView {
     layer.add(animation, forKey: "glitch.flicker")
   }
 }
+
+#else
+
+/// tvOS has no fold, no green line and no status bar to protect: the API exists but does nothing.
+final class GlitchOverlay {
+  static let shared = GlitchOverlay()
+  static var autoStartEnabled: Bool { return false }
+
+  private(set) var isEnabled = false
+  private(set) var style = GlitchStyle()
+
+  private init() {}
+
+  func setEnabled(_ enabled: Bool) {
+    isEnabled = enabled
+  }
+
+  func update(_ change: @escaping (inout GlitchStyle) -> Void) {
+    change(&style)
+  }
+
+  func reset() {
+    style = GlitchStyle()
+  }
+}
+
+#endif
 
 extension UIColor {
   func glitchBlended(with other: UIColor, fraction: CGFloat) -> UIColor {
