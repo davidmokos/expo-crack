@@ -39,4 +39,12 @@ export type CrackOptions = {
    * @default true
    */
   hideWhenFolded?: boolean;
+  /**
+   * On a foldable, react to the hinge angle (iOS 27.1 and later, iPhone Duo). Around half-open (118° to 142°)
+   * the whole panel on the line's side glitches with rolling bands; between 60° and 118° and between 142° and
+   * 165° a hairline second line shows; between 95° and 150° a faint vertical line shows just right of the
+   * hinge. Fully open is the classic single line.
+   * @default true
+   */
+  reactToHinge?: boolean;
 };

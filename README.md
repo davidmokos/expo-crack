@@ -15,16 +15,15 @@ Rebuild your app and that's it. The line is on by default. No code, no setup, no
 </p>
 
 <p align="center">
-  <img src="./docs/duo-closed.png" alt="The same app on the closed iPhone Duo: no line on the outer display" width="300" />
-  &nbsp;&nbsp;
-  <img src="./docs/android.png" alt="The example app on an Android emulator, with the same green line" width="200" />
+  <img src="./docs/duo-half-open.png" alt="The iPhone Duo half open: the whole right panel glitches with rolling bands" width="720" />
 </p>
-<p align="center"><sub>Closed Duo on the left: the line waits for you to open the phone. Android on the right: no hinge, no mercy.</sub></p>
+<p align="center"><sub>Half open: the whole right panel gives up. Fold it flat and it calms down to the single line.</sub></p>
 
 ## What you get
 
 - A bright, slightly flickering green line from the fold to the right edge, exactly where it belongs (62% down the screen).
 - On an iPhone Duo it only shows on the open inner display and hides while the phone is closed, like the real one. (It reads the hinge on iOS 27.1 and later.)
+- It reacts to the hinge angle. Around half-open (118° to 142°) the whole right panel glitches with rolling bands. Between 60° and 118° and between 142° and 165° a hairline second line shows up. Between 95° and 150° a faint vertical line appears just right of the hinge. Fully open, you get the classic single line.
 - It floats above everything: modals, alerts, your onboarding, your paywall.
 - It never eats a touch. Your users can keep tapping through it, like on the real thing.
 - iOS, Android and web. The line does not care how much you paid for the device. (tvOS builds compile, but get no line. Nobody folds a TV.)
@@ -51,6 +50,7 @@ Crack.configure({
   crease: true, // also draw the faint vertical line along the fold
   flicker: true, // let it flicker a little
   hideWhenFolded: true, // iPhone Duo: show it on the open inner display only
+  reactToHinge: true, // iPhone Duo: extra lines and the panel glitch at some hinge angles
 });
 
 Crack.reset(); // factory settings
@@ -91,7 +91,7 @@ Engagement.
 
 ## Example app
 
-The `example` folder is an SDK 58 app that shows the line on a lock-screen-style clock with a few toggles.
+The `example` folder is an SDK 58 app that is nothing but a white screen with a title. The line comes from installing the package, no code.
 
 ```sh
 cd example

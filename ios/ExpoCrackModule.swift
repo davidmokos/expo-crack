@@ -8,6 +8,7 @@ struct CrackOptions: Record {
   @Field var crease: Bool?
   @Field var flicker: Bool?
   @Field var hideWhenFolded: Bool?
+  @Field var reactToHinge: Bool?
 }
 
 public class ExpoCrackModule: Module {
@@ -52,6 +53,9 @@ public class ExpoCrackModule: Module {
         }
         if let hideWhenFolded = options.hideWhenFolded {
           style.hideWhenFolded = hideWhenFolded
+        }
+        if let reactToHinge = options.reactToHinge {
+          style.reactToHinge = reactToHinge
         }
       }
     }

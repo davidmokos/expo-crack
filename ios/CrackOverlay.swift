@@ -1,6 +1,6 @@
 import UIKit
 
-/// Visual configuration of the crack line. Mirrors `CrackOptions` on the JS side.
+/// Visual configuration of the crack. Mirrors `CrackOptions` on the JS side.
 struct CrackStyle {
   enum Side: String {
     case left
@@ -24,6 +24,28 @@ struct CrackStyle {
   var flicker: Bool = true
   /// On a foldable, hide the line while the device is closed and show it on the open inner display.
   var hideWhenFolded: Bool = true
+  /// On a foldable, react to the hinge angle: extra lines and a whole-panel glitch at some angles.
+  var reactToHinge: Bool = true
+}
+
+/// What the overlay draws for a hinge angle, in degrees (0 is closed, 180 is flat).
+struct CrackPose: Equatable {
+  var showsLine = true
+  var showsThinLine = false
+  var showsHingeLine = false
+  var showsPanelGlitch = false
+
+  /// A device without a hinge, or a hinge the overlay is not reacting to: the classic line only.
+  static let plain = CrackPose()
+
+  static func forHingeAngle(_ degrees: Double) -> CrackPose {
+    var pose = CrackPose()
+    pose.showsLine = degrees >= 25
+    pose.showsThinLine = (60..<118).contains(degrees) || (142...165).contains(degrees)
+    pose.showsHingeLine = (95...150).contains(degrees)
+    pose.showsPanelGlitch = (118...142).contains(degrees)
+    return pose
+  }
 }
 
 #if os(iOS)
@@ -43,6 +65,7 @@ final class CrackOverlay {
   private var observers: [NSObjectProtocol] = []
   private var hingeInteraction: UIInteraction?
   private var hingeIsClosed = false
+  private var hingeAngle: Double?
 
   private init() {}
 
@@ -134,12 +157,19 @@ final class CrackOverlay {
     guard let window else {
       return
     }
+    let pose: CrackPose
+    if style.reactToHinge, let angle = hingeAngle {
+      pose = .forHingeAngle(angle)
+    } else {
+      pose = .plain
+    }
+    window.lineView.pose = pose
     let hiddenByFold = style.hideWhenFolded && hingeIsClosed
-    window.isHidden = !isEnabled || hiddenByFold
+    window.isHidden = !isEnabled || hiddenByFold || !pose.showsLine
   }
 
   /// Watches the device hinge (iPhone Duo, iOS 27.1+) through a `UIHingeInteraction` on the app's key window,
-  /// the same way `expo-hinge` does. Devices without a hinge never report one, so the line stays visible there.
+  /// the same way `expo-hinge` does. Devices without a hinge never report one, so they get the classic line.
   private func attachHinge(near window: UIWindow) {
     #if canImport(UIKit, _version: 9127.0.85) // iOS 27.1 SDK
     guard #available(iOS 27.1, *) else {
@@ -154,7 +184,13 @@ final class CrackOverlay {
       guard let self else {
         return
       }
-      self.hingeIsClosed = update.hinge?.status == .closed
+      if let hinge = update.hinge {
+        self.hingeIsClosed = hinge.status == .closed
+        self.hingeAngle = Double(hinge.angle) * 180 / .pi
+      } else {
+        self.hingeIsClosed = false
+        self.hingeAngle = nil
+      }
       self.refreshVisibility()
     }
     host.addInteraction(interaction)
@@ -168,6 +204,7 @@ final class CrackOverlay {
     }
     hingeInteraction = nil
     hingeIsClosed = false
+    hingeAngle = nil
   }
 
   private static func activeWindowScene() -> UIWindowScene? {
@@ -235,7 +272,9 @@ final class CrackViewController: UIViewController {
   }
 }
 
-/// Draws the line: a soft glow, a banded bright core, a bloom where it meets the fold and an optional crease.
+/// Draws the crack: the main line (glow, banded core, bloom at the fold), a hairline second line,
+/// a faint vertical line right of the hinge, a whole-panel glitch, and an optional crease. Which of
+/// them show depends on `pose`, which follows the hinge angle on a foldable.
 final class CrackLineView: UIView {
   var style = CrackStyle() {
     didSet {
@@ -244,16 +283,43 @@ final class CrackLineView: UIView {
     }
   }
 
+  var pose = CrackPose.plain {
+    didSet {
+      if pose != oldValue {
+        applyPose()
+      }
+    }
+  }
+
+  private let panelLayer = CALayer()
+  private let bandsLayer = CAGradientLayer()
+  private let hingeLineLayer = CAGradientLayer()
+  private let thinLayer = CAGradientLayer()
+  private let creaseLayer = CAGradientLayer()
+  private let lineGroup = CALayer()
   private let glowLayer = CALayer()
   private let coreLayer = CAGradientLayer()
   private let bloomLayer = CAGradientLayer()
-  private let creaseLayer = CAGradientLayer()
 
   override init(frame: CGRect) {
     super.init(frame: frame)
     isUserInteractionEnabled = false
     backgroundColor = .clear
     isOpaque = false
+
+    panelLayer.masksToBounds = true
+    bandsLayer.startPoint = CGPoint(x: 0.5, y: 0)
+    bandsLayer.endPoint = CGPoint(x: 0.5, y: 1)
+    panelLayer.addSublayer(bandsLayer)
+
+    hingeLineLayer.startPoint = CGPoint(x: 0.5, y: 0)
+    hingeLineLayer.endPoint = CGPoint(x: 0.5, y: 1)
+
+    thinLayer.startPoint = CGPoint(x: 0, y: 0.5)
+    thinLayer.endPoint = CGPoint(x: 1, y: 0.5)
+
+    creaseLayer.startPoint = CGPoint(x: 0.5, y: 0)
+    creaseLayer.endPoint = CGPoint(x: 0.5, y: 1)
 
     glowLayer.shadowOffset = .zero
     glowLayer.shadowOpacity = 0.95
@@ -265,17 +331,18 @@ final class CrackLineView: UIView {
     bloomLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
     bloomLayer.endPoint = CGPoint(x: 1, y: 1)
 
-    creaseLayer.startPoint = CGPoint(x: 0.5, y: 0)
-    creaseLayer.endPoint = CGPoint(x: 0.5, y: 1)
-
-    for sublayer in [glowLayer, coreLayer, bloomLayer, creaseLayer] {
+    for sublayer in [glowLayer, coreLayer, bloomLayer] {
+      lineGroup.addSublayer(sublayer)
+    }
+    for sublayer in [panelLayer, hingeLineLayer, thinLayer, creaseLayer, lineGroup] {
       layer.addSublayer(sublayer)
     }
     applyStyle()
+    applyPose()
 
     NotificationCenter.default.addObserver(
       self,
-      selector: #selector(applyFlicker),
+      selector: #selector(applyAnimations),
       name: UIApplication.didBecomeActiveNotification,
       object: nil
     )
@@ -292,7 +359,7 @@ final class CrackLineView: UIView {
 
   override func didMoveToWindow() {
     super.didMoveToWindow()
-    applyFlicker()
+    applyAnimations()
   }
 
   override func layoutSubviews() {
@@ -317,8 +384,10 @@ final class CrackLineView: UIView {
       x0 = bounds.minX
       x1 = bounds.maxX
     }
-    let lineFrame = CGRect(x: x0, y: y - thickness / 2, width: max(0, x1 - x0), height: thickness)
+    let width = max(0, x1 - x0)
 
+    lineGroup.frame = bounds
+    let lineFrame = CGRect(x: x0, y: y - thickness / 2, width: width, height: thickness)
     coreLayer.frame = lineFrame
     glowLayer.frame = lineFrame.insetBy(dx: 0, dy: -thickness * 0.5)
     glowLayer.shadowRadius = max(3, thickness * 1.6)
@@ -329,6 +398,17 @@ final class CrackLineView: UIView {
     bloomLayer.frame = CGRect(x: bloomX - bloomSize / 2, y: y - bloomSize / 2, width: bloomSize, height: bloomSize)
     bloomLayer.isHidden = style.side == .full
 
+    // The hairline sits higher up the panel, where the second defect usually shows.
+    let thinY = (bounds.height * 0.41).rounded()
+    thinLayer.frame = CGRect(x: x0, y: thinY, width: width, height: 1)
+
+    // Just right of the hinge (or left, when the line is on the left half).
+    let hingeOffset: CGFloat = style.side == .left ? -14 : 14
+    hingeLineLayer.frame = CGRect(x: (bounds.midX + hingeOffset).rounded(), y: 0, width: 1, height: bounds.height)
+
+    panelLayer.frame = CGRect(x: x0, y: 0, width: width, height: bounds.height)
+    bandsLayer.frame = panelLayer.bounds.insetBy(dx: -8, dy: -48)
+
     creaseLayer.frame = CGRect(x: (bounds.midX - 0.5).rounded(), y: 0, width: 1, height: bounds.height)
     creaseLayer.isHidden = !style.crease
   }
@@ -336,8 +416,8 @@ final class CrackLineView: UIView {
   private func applyStyle() {
     let base = style.color
     let white = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-    let hot = base.crackBlended(with: white, fraction: 0.8)
-    let mid = base.crackBlended(with: white, fraction: 0.35)
+    let hot = base.crackBlended(with: white, fraction: 0.45)
+    let mid = base.crackBlended(with: white, fraction: 0.2)
 
     coreLayer.colors = [hot, mid, base, hot, mid, base.withAlphaComponent(0.9)].map { $0.cgColor }
     coreLayer.locations = [0, 0.08, 0.25, 0.4, 0.7, 1]
@@ -352,31 +432,123 @@ final class CrackLineView: UIView {
     ]
     bloomLayer.locations = [0, 0.35, 1]
 
-    let creaseTint = UIColor(red: 0.85, green: 1.0, blue: 0.3, alpha: 1.0)
-    let crease = base.crackBlended(with: creaseTint, fraction: 0.5)
+    thinLayer.colors = [
+      base.withAlphaComponent(0.9).cgColor,
+      hot.withAlphaComponent(0.95).cgColor,
+      base.withAlphaComponent(0.6).cgColor,
+      hot.withAlphaComponent(0.9).cgColor,
+    ]
+    thinLayer.locations = [0, 0.3, 0.6, 1]
+
+    let lime = UIColor(red: 0.85, green: 1.0, blue: 0.3, alpha: 1.0)
+    let hingeTint = base.crackBlended(with: lime, fraction: 0.5)
+    hingeLineLayer.colors = [
+      hingeTint.withAlphaComponent(0).cgColor,
+      hingeTint.withAlphaComponent(0.8).cgColor,
+      hingeTint.withAlphaComponent(0.8).cgColor,
+      hingeTint.withAlphaComponent(0).cgColor,
+    ]
+    hingeLineLayer.locations = [0, 0.12, 0.88, 1]
+
+    let creaseTint = base.crackBlended(with: lime, fraction: 0.5)
     creaseLayer.colors = [
-      crease.withAlphaComponent(0).cgColor,
-      crease.withAlphaComponent(0.85).cgColor,
-      crease.withAlphaComponent(0.85).cgColor,
-      crease.withAlphaComponent(0).cgColor,
+      creaseTint.withAlphaComponent(0).cgColor,
+      creaseTint.withAlphaComponent(0.85).cgColor,
+      creaseTint.withAlphaComponent(0.85).cgColor,
+      creaseTint.withAlphaComponent(0).cgColor,
     ]
     creaseLayer.locations = [0, 0.08, 0.92, 1]
 
-    applyFlicker()
+    panelLayer.backgroundColor = base.withAlphaComponent(0.1).cgColor
+    applyBands(base: base)
+    applyAnimations()
   }
 
-  @objc private func applyFlicker() {
-    layer.removeAnimation(forKey: "crack.flicker")
+  private func applyPose() {
+    CATransaction.begin()
+    CATransaction.setDisableActions(true)
+    thinLayer.isHidden = !pose.showsThinLine
+    hingeLineLayer.isHidden = !pose.showsHingeLine
+    panelLayer.isHidden = !pose.showsPanelGlitch
+    CATransaction.commit()
+    applyAnimations()
+  }
+
+  /// Rolling bands of uneven height, like a panel driver that lost sync. Deterministic, so every
+  /// launch looks the same broken.
+  private func applyBands(base: UIColor) {
+    let magenta = UIColor(red: 1.0, green: 0.3, blue: 0.8, alpha: 1.0)
+    let tints = [
+      base.withAlphaComponent(0.28),
+      UIColor.clear,
+      magenta.withAlphaComponent(0.12),
+      UIColor.clear,
+      UIColor(red: 1, green: 1, blue: 1, alpha: 0.18),
+      UIColor.clear,
+    ]
+    var seed: UInt32 = 0x9E37_79B9
+    func next() -> CGFloat {
+      seed = seed &* 1_664_525 &+ 1_013_904_223
+      return CGFloat(seed >> 8) / CGFloat(1 << 24)
+    }
+    var colors: [CGColor] = []
+    var locations: [NSNumber] = []
+    var position: CGFloat = 0
+    var index = 0
+    while position < 1 {
+      let height = 0.01 + next() * 0.06
+      let end = min(1, position + height)
+      let tint = tints[index % tints.count].cgColor
+      colors.append(tint)
+      colors.append(tint)
+      locations.append(NSNumber(value: Double(position)))
+      locations.append(NSNumber(value: Double(end)))
+      position = end
+      index += 1
+    }
+    bandsLayer.colors = colors
+    bandsLayer.locations = locations
+  }
+
+  @objc private func applyAnimations() {
+    for animated in [lineGroup, thinLayer, hingeLineLayer, panelLayer, bandsLayer] {
+      animated.removeAllAnimations()
+      animated.opacity = 1
+    }
     guard style.flicker, !UIAccessibility.isReduceMotionEnabled else {
-      layer.opacity = 1
       return
     }
+    lineGroup.add(Self.flicker([1, 1, 0.82, 1, 0, 1, 1, 0.9, 1, 0.7, 1, 1, 0.35, 1, 1], duration: 3.1), forKey: "crack.flicker")
+    if pose.showsThinLine {
+      thinLayer.add(Self.flicker([1, 1, 0, 1, 1, 0.6, 1, 0, 0, 1, 1, 0.3, 1], duration: 1.7), forKey: "crack.flicker")
+    }
+    if pose.showsHingeLine {
+      hingeLineLayer.add(Self.flicker([1, 0, 0, 1, 1, 0, 1, 0.5, 0, 0, 1, 1, 0], duration: 2.3), forKey: "crack.flicker")
+    }
+    if pose.showsPanelGlitch {
+      panelLayer.add(Self.flicker([1, 0.55, 1, 0.3, 0.9, 1, 0.45, 1, 0.7, 0.2, 1, 1], duration: 0.9), forKey: "crack.flicker")
+      let roll = CAKeyframeAnimation(keyPath: "transform.translation.y")
+      roll.values = [0.0, 3.0, -2.0, 0.0, 5.0, 0.0, -4.0, 1.0, 0.0, 7.0, -1.0, 0.0]
+      roll.calculationMode = .discrete
+      roll.duration = 0.7
+      roll.repeatCount = .infinity
+      bandsLayer.add(roll, forKey: "crack.roll")
+      let tear = CAKeyframeAnimation(keyPath: "transform.translation.x")
+      tear.values = [0.0, 2.0, -3.0, 0.0, 0.0, 4.0, 0.0, -2.0, 0.0]
+      tear.calculationMode = .discrete
+      tear.duration = 1.1
+      tear.repeatCount = .infinity
+      bandsLayer.add(tear, forKey: "crack.tear")
+    }
+  }
+
+  private static func flicker(_ values: [Double], duration: CFTimeInterval) -> CAKeyframeAnimation {
     let animation = CAKeyframeAnimation(keyPath: "opacity")
-    animation.values = [1.0, 1.0, 0.82, 1.0, 1.0, 1.0, 0.9, 1.0, 0.7, 1.0, 1.0, 1.0]
+    animation.values = values
     animation.calculationMode = .discrete
-    animation.duration = 3.1
+    animation.duration = duration
     animation.repeatCount = .infinity
-    layer.add(animation, forKey: "crack.flicker")
+    return animation
   }
 }
 

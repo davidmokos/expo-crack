@@ -13,6 +13,7 @@ class CrackOptions : Record {
   @Field val crease: Boolean? = null
   @Field val flicker: Boolean? = null
   @Field val hideWhenFolded: Boolean? = null
+  @Field val reactToHinge: Boolean? = null
 }
 
 class ExpoCrackModule : Module() {

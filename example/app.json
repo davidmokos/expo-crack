@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "expo.modules.crack.example"
@@ -24,7 +24,7 @@
       "favicon": "./assets/favicon.png"
     },
     "scheme": "expocrack",
-    "backgroundColor": "#0e0f1a",
+    "backgroundColor": "#ffffff",
     "experiments": {
       "autolinkingModuleResolution": true
     },
