@@ -14,6 +14,10 @@ Rebuild your app and that's it. The line is on by default. No code, no setup, no
   <img src="./docs/duo.png" alt="The example app on an iPhone Duo simulator, with the green line across the right half of the screen" width="720" />
 </p>
 
+<p align="center">
+  <img src="./docs/android.png" alt="The example app on an Android emulator, with the same green line" width="240" />
+</p>
+
 ## What you get
 
 - A bright, slightly flickering green line from the fold to the right edge, exactly where it belongs (62% down the screen).
