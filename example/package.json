@@ -19,7 +19,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eas-build-post-install": "cd .. && npm ci"
+    "eas-build-post-install": "cd .. && npm install --no-audit --no-fund"
   },
   "private": true,
   "expo": {
