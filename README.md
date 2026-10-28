@@ -101,12 +101,18 @@ Engagement.
 
 The `example` folder is an SDK 58 app that is nothing but a white screen with a title. The line comes from installing the package, no code.
 
+To run it on the iPhone Duo simulator you need Xcode 27.1 or later (that is where the Duo and its hinge live).
+
 ```sh
-cd example
-npm install
-npx expo run:ios        # local simulator
-eas build -p ios --profile preview   # simulator build on EAS, works with `eas simulator:start --device "iPhone Duo"`
+git clone https://github.com/davidmokos/expo-crack.git
+cd expo-crack && npm install          # also builds the module
+cd example && npm install
+npx expo run:ios --device "iPhone Duo"
 ```
+
+Fold and unfold the simulator with its hinge controls, or from a terminal: `npx agent-device@latest fold half-open` (also `open`, `closed`, or `--keyframes` for exact angles).
+
+No Mac with Xcode 27? `eas build -p ios --profile development`, then `eas simulator:start --device "iPhone Duo" --build-id <id>` runs it on an EAS cloud simulator.
 
 ## License
 
