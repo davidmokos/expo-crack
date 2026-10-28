@@ -17,6 +17,7 @@ Rebuild your app and that's it. The line is on by default. No code, no setup, no
 ## What you get
 
 - A bright, slightly flickering green line from the fold to the right edge, exactly where it belongs (62% down the screen).
+- On an iPhone Duo it only shows on the open inner display and hides while the phone is closed, like the real one. (It reads the hinge on iOS 27.1 and later.)
 - It floats above everything: modals, alerts, your onboarding, your paywall.
 - It never eats a touch. Your users can keep tapping through it, like on the real thing.
 - iOS, Android and web. The line does not care how much you paid for the device. (tvOS builds compile, but get no line. Nobody folds a TV.)
@@ -42,6 +43,7 @@ Glitch.configure({
   side: 'right', // 'left' | 'right' | 'full'
   crease: true, // also draw the faint vertical line along the fold
   flicker: true, // let it flicker a little
+  hideWhenFolded: true, // iPhone Duo: show it on the open inner display only
 });
 
 Glitch.reset(); // factory settings

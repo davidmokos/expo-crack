@@ -7,6 +7,7 @@ struct GlitchOptions: Record {
   @Field var side: String?
   @Field var crease: Bool?
   @Field var flicker: Bool?
+  @Field var hideWhenFolded: Bool?
 }
 
 public class ExpoGlitchModule: Module {
@@ -48,6 +49,9 @@ public class ExpoGlitchModule: Module {
         }
         if let flicker = options.flicker {
           style.flicker = flicker
+        }
+        if let hideWhenFolded = options.hideWhenFolded {
+          style.hideWhenFolded = hideWhenFolded
         }
       }
     }

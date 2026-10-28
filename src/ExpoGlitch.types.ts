@@ -32,4 +32,11 @@ export type GlitchOptions = {
    * @default true
    */
   flicker?: boolean;
+  /**
+   * On a foldable, hide the line while the device is closed and show it on the open inner display,
+   * which is where it belongs. Uses the hinge on iOS 27.1 and later (iPhone Duo); other devices never report
+   * a hinge, so the line stays visible there.
+   * @default true
+   */
+  hideWhenFolded?: boolean;
 };

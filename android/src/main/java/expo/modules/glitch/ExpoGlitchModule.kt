@@ -12,6 +12,7 @@ class GlitchOptions : Record {
   @Field val side: String? = null
   @Field val crease: Boolean? = null
   @Field val flicker: Boolean? = null
+  @Field val hideWhenFolded: Boolean? = null
 }
 
 class ExpoGlitchModule : Module() {
