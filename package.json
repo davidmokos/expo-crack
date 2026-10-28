@@ -23,7 +23,10 @@
     "green-line",
     "joke"
   ],
-  "repository": "https://github.com/davidmokos/expo-crack",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidmokos/expo-crack.git"
+  },
   "bugs": {
     "url": "https://github.com/davidmokos/expo-crack/issues"
   },
