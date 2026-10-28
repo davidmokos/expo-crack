@@ -19,7 +19,7 @@ Rebuild your app and that's it. The line is on by default. No code, no setup, no
 - A bright, slightly flickering green line from the fold to the right edge, exactly where it belongs (62% down the screen).
 - It floats above everything: modals, alerts, your onboarding, your paywall.
 - It never eats a touch. Your users can keep tapping through it, like on the real thing.
-- iOS, Android and web. The line does not care how much you paid for the device.
+- iOS, Android and web. The line does not care how much you paid for the device. (tvOS builds compile, but get no line. Nobody folds a TV.)
 
 ## Usage
 
@@ -87,7 +87,8 @@ The `example` folder is an SDK 58 app that shows the line on a lock-screen-style
 ```sh
 cd example
 npm install
-npx expo run:ios
+npx expo run:ios        # local simulator
+eas build -p ios --profile preview   # simulator build on EAS, works with `eas simulator:start --device "iPhone Duo"`
 ```
 
 ## License
