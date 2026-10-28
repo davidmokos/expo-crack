@@ -19,6 +19,13 @@ Rebuild your app and that's it. The line is on by default. No code, no setup, no
 </p>
 <p align="center"><sub>Half open: the whole right panel gives up. Fold it flat and it calms down to the single line.</sub></p>
 
+<p align="center">
+  <img src="./docs/duo-100.png" alt="The iPhone Duo at 100 degrees: the main line plus a hairline second line" width="440" />
+  &nbsp;&nbsp;
+  <img src="./docs/duo-closed.png" alt="The closed iPhone Duo: no line on the outer display" width="216" />
+</p>
+<p align="center"><sub>At 100°: a second hairline. Closed: nothing, the line waits for you to open the phone.</sub></p>
+
 ## What you get
 
 - A bright, slightly flickering green line from the fold to the right edge, exactly where it belongs (62% down the screen).
