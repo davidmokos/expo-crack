@@ -22,6 +22,8 @@ struct GlitchStyle {
   var crease: Bool = false
   /// Let the line flicker a little.
   var flicker: Bool = true
+  /// On a foldable, hide the line while the device is closed and show it on the open inner display.
+  var hideWhenFolded: Bool = true
 }
 
 #if os(iOS)
@@ -39,6 +41,8 @@ final class GlitchOverlay {
   private(set) var style = GlitchStyle()
   private var window: GlitchWindow?
   private var observers: [NSObjectProtocol] = []
+  private var hingeInteraction: UIInteraction?
+  private var hingeIsClosed = false
 
   private init() {}
 
@@ -58,6 +62,7 @@ final class GlitchOverlay {
     onMain { [self] in
       change(&style)
       window?.lineView.style = style
+      refreshVisibility()
     }
   }
 
@@ -105,7 +110,8 @@ final class GlitchOverlay {
       return
     }
     if let window, window.windowScene != nil {
-      window.isHidden = false
+      attachHinge(near: window)
+      refreshVisibility()
       return
     }
     guard let scene = Self.activeWindowScene() else {
@@ -113,13 +119,55 @@ final class GlitchOverlay {
     }
     let window = GlitchWindow(windowScene: scene)
     window.lineView.style = style
-    window.isHidden = false
     self.window = window
+    attachHinge(near: window)
+    refreshVisibility()
   }
 
   private func detach() {
     window?.isHidden = true
     window = nil
+    detachHinge()
+  }
+
+  private func refreshVisibility() {
+    guard let window else {
+      return
+    }
+    let hiddenByFold = style.hideWhenFolded && hingeIsClosed
+    window.isHidden = !isEnabled || hiddenByFold
+  }
+
+  /// Watches the device hinge (iPhone Duo, iOS 27.1+) through a `UIHingeInteraction` on the app's key window,
+  /// the same way `expo-hinge` does. Devices without a hinge never report one, so the line stays visible there.
+  private func attachHinge(near window: UIWindow) {
+    #if canImport(UIKit, _version: 9127.0.85) // iOS 27.1 SDK
+    guard #available(iOS 27.1, *) else {
+      return
+    }
+    let host = window.windowScene?.keyWindow ?? window
+    if let hingeInteraction, hingeInteraction.view === host {
+      return
+    }
+    detachHinge()
+    let interaction = UIHingeInteraction { [weak self] _, update in
+      guard let self else {
+        return
+      }
+      self.hingeIsClosed = update.hinge?.status == .closed
+      self.refreshVisibility()
+    }
+    host.addInteraction(interaction)
+    hingeInteraction = interaction
+    #endif
+  }
+
+  private func detachHinge() {
+    if let hingeInteraction {
+      hingeInteraction.view?.removeInteraction(hingeInteraction)
+    }
+    hingeInteraction = nil
+    hingeIsClosed = false
   }
 
   private static func activeWindowScene() -> UIWindowScene? {
