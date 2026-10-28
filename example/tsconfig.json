@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-glitch": ["../src/index"],
+      "expo-glitch/*": ["../src/*"]
+    }
+  }
+}

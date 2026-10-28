@@ -1,0 +1,35 @@
+/** Which half of the screen the line crosses. The authentic one is `'right'`. */
+export type GlitchSide = 'left' | 'right' | 'full';
+
+export type GlitchOptions = {
+  /**
+   * Vertical position of the line as a fraction of the screen height (0 = top, 1 = bottom).
+   * @default 0.62
+   */
+  y?: number;
+  /**
+   * Thickness of the bright core of the line, in points.
+   * @default 3
+   */
+  thickness?: number;
+  /**
+   * Color of the line as a hex string (`#RGB`, `#RRGGBB` or `#RRGGBBAA`).
+   * @default '#61FFCC'
+   */
+  color?: string;
+  /**
+   * Which half of the screen the line crosses, starting at the fold.
+   * @default 'right'
+   */
+  side?: GlitchSide;
+  /**
+   * Also draw the faint vertical line along the fold.
+   * @default false
+   */
+  crease?: boolean;
+  /**
+   * Let the line flicker a little, like it is thinking about dying.
+   * @default true
+   */
+  flicker?: boolean;
+};

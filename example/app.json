@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "expo-glitch example",
+    "slug": "expo-glitch-example",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "expo.modules.glitch.example"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "expo.modules.glitch.example"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "expoglitch",
+    "backgroundColor": "#0e0f1a",
+    "experiments": {
+      "autolinkingModuleResolution": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "cbccd7dc-7fb6-48e7-8ea6-18ed96405a5a"
+      }
+    },
+    "owner": "mokosdavid"
+  }
+}

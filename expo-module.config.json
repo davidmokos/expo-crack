@@ -1,0 +1,10 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["ExpoGlitchModule"],
+    "appDelegateSubscribers": ["ExpoGlitchAppDelegateSubscriber"]
+  },
+  "android": {
+    "modules": ["expo.modules.glitch.ExpoGlitchModule"]
+  }
+}
