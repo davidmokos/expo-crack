@@ -28,7 +28,8 @@ export type CrackOptions = {
    */
   crease?: boolean;
   /**
-   * Let the line flicker a little, like it is thinking about dying.
+   * Let the crack flicker while the hinge is moving (iPhone Duo). It holds still when the hinge is not
+   * moving, and on platforms without a hinge it never flickers.
    * @default true
    */
   flicker?: boolean;

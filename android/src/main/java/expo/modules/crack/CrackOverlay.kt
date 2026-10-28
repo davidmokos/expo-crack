@@ -160,6 +160,7 @@ class CrackLineView(context: Context) : View(context) {
 
   private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
   private val corePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+  private val underPaint = Paint(Paint.ANTI_ALIAS_FLAG)
   private val creasePaint = Paint(Paint.ANTI_ALIAS_FLAG)
   private var flickerAnimator: ValueAnimator? = null
 
@@ -219,6 +220,16 @@ class CrackLineView(context: Context) : View(context) {
     )
     canvas.drawRect(x0, y - thickness / 2f, x1, y + thickness / 2f, corePaint)
 
+    // A hairline a few millimetres under the main line.
+    underPaint.shader = LinearGradient(
+      x0, 0f, x1, 0f,
+      intArrayOf(withAlpha(base, 0.75f), withAlpha(hot, 0.8f), withAlpha(base, 0.5f), withAlpha(base, 0.8f)),
+      floatArrayOf(0f, 0.2f, 0.55f, 1f),
+      Shader.TileMode.CLAMP,
+    )
+    val underY = y + 16f * density
+    canvas.drawRect(x0, underY, x1, underY + density, underPaint)
+
     if (style.crease) {
       val creaseColor = blend(base, Color.rgb(217, 255, 77), 0.5f)
       creasePaint.shader = LinearGradient(
@@ -233,23 +244,10 @@ class CrackLineView(context: Context) : View(context) {
   }
 
   private fun applyFlicker() {
+    // The crack only flickers while a hinge moves, and Android has no hinge integration: it holds still here.
     flickerAnimator?.cancel()
     flickerAnimator = null
     alpha = 1f
-    if (!style.flicker || !isAttachedToWindow) {
-      return
-    }
-    val steps = floatArrayOf(1f, 1f, 0.82f, 1f, 1f, 1f, 0.9f, 1f, 0.7f, 1f, 1f, 1f)
-    flickerAnimator = ValueAnimator.ofInt(0, steps.size).apply {
-      duration = 3100
-      repeatCount = ValueAnimator.INFINITE
-      interpolator = null
-      addUpdateListener { animator ->
-        val index = (animator.animatedValue as Int).coerceIn(0, steps.size - 1)
-        alpha = steps[index]
-      }
-      start()
-    }
   }
 
   private fun blend(from: Int, to: Int, fraction: Float): Int {

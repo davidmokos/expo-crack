@@ -28,7 +28,8 @@ Rebuild your app and that's it. The line is on by default. No code, no setup, no
 
 ## What you get
 
-- A bright, slightly flickering green line from the fold to the right edge, exactly where it belongs (62% down the screen).
+- A bright green line from the fold to the right edge, exactly where it belongs (62% down the screen), with a hairline a few millimetres under it.
+- It flickers only while the hinge is moving. The rest of the time it holds perfectly still, like a real defect.
 - On an iPhone Duo it only shows on the open inner display and hides while the phone is closed, like the real one. (It reads the hinge on iOS 27.1 and later.)
 - It reacts to the hinge angle. Around half-open (118° to 142°) the whole right panel glitches with rolling bands. Between 60° and 118° and between 142° and 165° a hairline second line shows up. Between 95° and 150° a faint vertical line appears just right of the hinge. Fully open, you get the classic single line.
 - It floats above everything: modals, alerts, your onboarding, your paywall.
@@ -55,7 +56,7 @@ Crack.configure({
   color: '#61FFCC', // #RGB, #RRGGBB or #RRGGBBAA
   side: 'right', // 'left' | 'right' | 'full'
   crease: true, // also draw the faint vertical line along the fold
-  flicker: true, // let it flicker a little
+  flicker: true, // flicker while the hinge moves
   hideWhenFolded: true, // iPhone Duo: show it on the open inner display only
   reactToHinge: true, // iPhone Duo: extra lines and the panel glitch at some hinge angles
 });

@@ -20,7 +20,7 @@ struct CrackStyle {
   var side: Side = .right
   /// Also draw the faint vertical line along the fold.
   var crease: Bool = false
-  /// Let the line flicker a little.
+  /// Let the crack flicker while the hinge is moving. It holds still when the hinge does.
   var flicker: Bool = true
   /// On a foldable, hide the line while the device is closed and show it on the open inner display.
   var hideWhenFolded: Bool = true
@@ -66,6 +66,7 @@ final class CrackOverlay {
   private var hingeInteraction: UIInteraction?
   private var hingeIsClosed = false
   private var hingeAngle: Double?
+  private var hingeSettleWork: DispatchWorkItem?
 
   private init() {}
 
@@ -184,12 +185,16 @@ final class CrackOverlay {
       guard let self else {
         return
       }
+      let previousAngle = self.hingeAngle
       if let hinge = update.hinge {
         self.hingeIsClosed = hinge.status == .closed
         self.hingeAngle = Double(hinge.angle) * 180 / .pi
       } else {
         self.hingeIsClosed = false
         self.hingeAngle = nil
+      }
+      if let previousAngle, let angle = self.hingeAngle, abs(angle - previousAngle) > 0.5 {
+        self.markHingeMoving()
       }
       self.refreshVisibility()
     }
@@ -205,6 +210,19 @@ final class CrackOverlay {
     hingeInteraction = nil
     hingeIsClosed = false
     hingeAngle = nil
+    hingeSettleWork?.cancel()
+    hingeSettleWork = nil
+  }
+
+  /// The crack only flickers while the hinge moves. Motion ends 0.7 s after the last angle change.
+  private func markHingeMoving() {
+    window?.lineView.animated = true
+    hingeSettleWork?.cancel()
+    let work = DispatchWorkItem { [weak self] in
+      self?.window?.lineView.animated = false
+    }
+    hingeSettleWork = work
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.7, execute: work)
   }
 
   private static func activeWindowScene() -> UIWindowScene? {
@@ -272,9 +290,10 @@ final class CrackViewController: UIViewController {
   }
 }
 
-/// Draws the crack: the main line (glow, banded core, bloom at the fold), a hairline second line,
-/// a faint vertical line right of the hinge, a whole-panel glitch, and an optional crease. Which of
-/// them show depends on `pose`, which follows the hinge angle on a foldable.
+/// Draws the crack: the main line (glow and banded core) with a hairline a few millimetres under it,
+/// a second hairline higher up, a faint vertical line right of the hinge, a whole-panel glitch, and an
+/// optional crease. Which of them show depends on `pose`, which follows the hinge angle on a foldable.
+/// Everything holds still unless `animated` is set, which the overlay does while the hinge moves.
 final class CrackLineView: UIView {
   var style = CrackStyle() {
     didSet {
@@ -291,6 +310,15 @@ final class CrackLineView: UIView {
     }
   }
 
+  /// True while the hinge is moving: flicker, strobe and rolling bands run. False: everything is static.
+  var animated = false {
+    didSet {
+      if animated != oldValue {
+        applyAnimations()
+      }
+    }
+  }
+
   private let panelLayer = CALayer()
   private let bandsLayer = CAGradientLayer()
   private let hingeLineLayer = CAGradientLayer()
@@ -299,7 +327,7 @@ final class CrackLineView: UIView {
   private let lineGroup = CALayer()
   private let glowLayer = CALayer()
   private let coreLayer = CAGradientLayer()
-  private let bloomLayer = CAGradientLayer()
+  private let underLayer = CAGradientLayer()
 
   override init(frame: CGRect) {
     super.init(frame: frame)
@@ -327,11 +355,10 @@ final class CrackLineView: UIView {
     coreLayer.startPoint = CGPoint(x: 0, y: 0.5)
     coreLayer.endPoint = CGPoint(x: 1, y: 0.5)
 
-    bloomLayer.type = .radial
-    bloomLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
-    bloomLayer.endPoint = CGPoint(x: 1, y: 1)
+    underLayer.startPoint = CGPoint(x: 0, y: 0.5)
+    underLayer.endPoint = CGPoint(x: 1, y: 0.5)
 
-    for sublayer in [glowLayer, coreLayer, bloomLayer] {
+    for sublayer in [glowLayer, coreLayer, underLayer] {
       lineGroup.addSublayer(sublayer)
     }
     for sublayer in [panelLayer, hingeLineLayer, thinLayer, creaseLayer, lineGroup] {
@@ -393,10 +420,8 @@ final class CrackLineView: UIView {
     glowLayer.shadowRadius = max(3, thickness * 1.6)
     glowLayer.shadowPath = UIBezierPath(rect: glowLayer.bounds).cgPath
 
-    let bloomSize = thickness * 9
-    let bloomX = style.side == .left ? x1 : x0
-    bloomLayer.frame = CGRect(x: bloomX - bloomSize / 2, y: y - bloomSize / 2, width: bloomSize, height: bloomSize)
-    bloomLayer.isHidden = style.side == .full
+    // A hairline a few millimetres under the main line, like a second row of dead drivers.
+    underLayer.frame = CGRect(x: x0, y: y + 16, width: width, height: 1)
 
     // The hairline sits higher up the panel, where the second defect usually shows.
     let thinY = (bounds.height * 0.41).rounded()
@@ -425,12 +450,13 @@ final class CrackLineView: UIView {
     glowLayer.backgroundColor = base.withAlphaComponent(0.55).cgColor
     glowLayer.shadowColor = base.cgColor
 
-    bloomLayer.colors = [
-      hot.withAlphaComponent(0.9).cgColor,
-      base.withAlphaComponent(0.35).cgColor,
-      UIColor.clear.cgColor,
+    underLayer.colors = [
+      base.withAlphaComponent(0.75).cgColor,
+      hot.withAlphaComponent(0.8).cgColor,
+      base.withAlphaComponent(0.5).cgColor,
+      base.withAlphaComponent(0.8).cgColor,
     ]
-    bloomLayer.locations = [0, 0.35, 1]
+    underLayer.locations = [0, 0.2, 0.55, 1]
 
     thinLayer.colors = [
       base.withAlphaComponent(0.9).cgColor,
@@ -515,7 +541,7 @@ final class CrackLineView: UIView {
       animated.removeAllAnimations()
       animated.opacity = 1
     }
-    guard style.flicker, !UIAccessibility.isReduceMotionEnabled else {
+    guard animated, style.flicker, !UIAccessibility.isReduceMotionEnabled else {
       return
     }
     lineGroup.add(Self.flicker([1, 1, 0.82, 1, 0, 1, 1, 0.9, 1, 0.7, 1, 1, 0.35, 1, 1], duration: 3.1), forKey: "crack.flicker")

@@ -20,27 +20,6 @@ const DEFAULT_STYLE: Style = {
   flicker: true,
 };
 
-const STYLE_ID = 'expo-crack-style';
-
-function ensureKeyframes() {
-  if (document.getElementById(STYLE_ID)) {
-    return;
-  }
-  const style = document.createElement('style');
-  style.id = STYLE_ID;
-  style.textContent = `
-@keyframes expo-crack-flicker {
-  0%, 15%, 25%, 49%, 51%, 65%, 67%, 100% { opacity: 1; }
-  16%, 24% { opacity: 0.82; }
-  50% { opacity: 0.9; }
-  66% { opacity: 0.7; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .expo-crack { animation: none !important; }
-}`;
-  document.head.appendChild(style);
-}
-
 class ExpoCrackModule extends NativeModule {
   private style: Style = { ...DEFAULT_STYLE };
   private enabled = false;
@@ -88,8 +67,7 @@ class ExpoCrackModule extends NativeModule {
     if (typeof document === 'undefined') {
       return;
     }
-    ensureKeyframes();
-    const { y, thickness, color, side, crease, flicker } = this.style;
+    const { y, thickness, color, side, crease } = this.style;
 
     if (!this.root) {
       this.root = document.createElement('div');
@@ -97,13 +75,8 @@ class ExpoCrackModule extends NativeModule {
       document.body.appendChild(this.root);
     }
     const root = this.root;
-    root.style.cssText = [
-      'position: fixed',
-      'inset: 0',
-      'pointer-events: none',
-      'z-index: 2147483647',
-      flicker ? 'animation: expo-crack-flicker 3.1s steps(1, end) infinite' : '',
-    ].join(';');
+    // The crack only flickers while a hinge moves, and the web has no hinge: it holds still here.
+    root.style.cssText = ['position: fixed', 'inset: 0', 'pointer-events: none', 'z-index: 2147483647'].join(';');
 
     const left = side === 'left' ? '0' : '50%';
     const width = side === 'full' ? '100%' : '50%';
@@ -111,6 +84,8 @@ class ExpoCrackModule extends NativeModule {
       <div style="position:absolute;left:${left};width:${width};top:calc(${y * 100}% - ${thickness / 2}px);height:${thickness}px;
         background:linear-gradient(90deg, #ffffff 0%, ${color} 25%, #ffffff 40%, ${color} 70%, ${color} 100%);
         box-shadow:0 0 ${thickness * 1.6}px ${thickness * 0.5}px ${color};"></div>
+      <div style="position:absolute;left:${left};width:${width};top:calc(${y * 100}% + 16px);height:1px;opacity:0.8;
+        background:linear-gradient(90deg, ${color} 0%, #ffffff 20%, ${color} 55%, ${color} 100%);"></div>
       ${
         crease
           ? `<div style="position:absolute;left:calc(50% - 0.5px);width:1px;top:0;bottom:0;
