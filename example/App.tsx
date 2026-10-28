@@ -1,10 +1,10 @@
-import Glitch, { GlitchSide } from 'expo-glitch';
+import Crack, { CrackSide } from 'expo-crack';
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, StatusBar, StyleSheet, Switch, Text, View, useWindowDimensions } from 'react-native';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const SIDES: GlitchSide[] = ['left', 'right', 'full'];
+const SIDES: CrackSide[] = ['left', 'right', 'full'];
 
 function useClock() {
   const [now, setNow] = useState(() => new Date());
@@ -18,13 +18,13 @@ function useClock() {
 export default function App() {
   const now = useClock();
   const { width, height } = useWindowDimensions();
-  const [enabled, setEnabled] = useState(() => Glitch.isEnabled());
+  const [enabled, setEnabled] = useState(() => Crack.isEnabled());
   const [crease, setCrease] = useState(false);
   const [flicker, setFlicker] = useState(true);
-  const [side, setSide] = useState<GlitchSide>('right');
+  const [side, setSide] = useState<CrackSide>('right');
 
   useEffect(() => {
-    Glitch.configure({ crease, flicker, side });
+    Crack.configure({ crease, flicker, side });
   }, [crease, flicker, side]);
 
   const hours = now.getHours() % 12 || 12;
@@ -51,9 +51,9 @@ export default function App() {
           value={enabled}
           onChange={(value) => {
             if (value) {
-              Glitch.enable();
+              Crack.enable();
             } else {
-              Glitch.disable();
+              Crack.disable();
             }
             setEnabled(value);
           }}
@@ -76,7 +76,7 @@ export default function App() {
         </View>
 
         <Text style={styles.footer}>
-          npx expo install expo-glitch · {Math.round(width)} × {Math.round(height)} pt
+          npx expo install expo-crack · {Math.round(width)} × {Math.round(height)} pt
         </Text>
       </View>
     </View>

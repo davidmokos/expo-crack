@@ -1,7 +1,7 @@
 import UIKit
 
-/// Visual configuration of the glitch line. Mirrors `GlitchOptions` on the JS side.
-struct GlitchStyle {
+/// Visual configuration of the crack line. Mirrors `CrackOptions` on the JS side.
+struct CrackStyle {
   enum Side: String {
     case left
     case right
@@ -15,7 +15,7 @@ struct GlitchStyle {
   var y: CGFloat = 0.62
   /// Thickness of the bright core, in points.
   var thickness: CGFloat = 3
-  var color: UIColor = GlitchStyle.defaultColor
+  var color: UIColor = CrackStyle.defaultColor
   /// Which half of the screen the line crosses. The authentic one is the right half.
   var side: Side = .right
   /// Also draw the faint vertical line along the fold.
@@ -29,17 +29,17 @@ struct GlitchStyle {
 #if os(iOS)
 
 /// Owns the overlay window and keeps it attached to the active scene.
-final class GlitchOverlay {
-  static let shared = GlitchOverlay()
+final class CrackOverlay {
+  static let shared = CrackOverlay()
 
-  /// `ExpoGlitchAutoStart` in Info.plist (written by the config plugin). Defaults to true: the glitch is a feature.
+  /// `ExpoCrackAutoStart` in Info.plist (written by the config plugin). Defaults to true: the crack is a feature.
   static var autoStartEnabled: Bool {
-    return (Bundle.main.object(forInfoDictionaryKey: "ExpoGlitchAutoStart") as? Bool) ?? true
+    return (Bundle.main.object(forInfoDictionaryKey: "ExpoCrackAutoStart") as? Bool) ?? true
   }
 
   private(set) var isEnabled = false
-  private(set) var style = GlitchStyle()
-  private var window: GlitchWindow?
+  private(set) var style = CrackStyle()
+  private var window: CrackWindow?
   private var observers: [NSObjectProtocol] = []
   private var hingeInteraction: UIInteraction?
   private var hingeIsClosed = false
@@ -58,7 +58,7 @@ final class GlitchOverlay {
     }
   }
 
-  func update(_ change: @escaping (inout GlitchStyle) -> Void) {
+  func update(_ change: @escaping (inout CrackStyle) -> Void) {
     onMain { [self] in
       change(&style)
       window?.lineView.style = style
@@ -68,7 +68,7 @@ final class GlitchOverlay {
 
   func reset() {
     update { style in
-      style = GlitchStyle()
+      style = CrackStyle()
     }
   }
 
@@ -117,7 +117,7 @@ final class GlitchOverlay {
     guard let scene = Self.activeWindowScene() else {
       return
     }
-    let window = GlitchWindow(windowScene: scene)
+    let window = CrackWindow(windowScene: scene)
     window.lineView.style = style
     self.window = window
     attachHinge(near: window)
@@ -179,15 +179,15 @@ final class GlitchOverlay {
 }
 
 /// A transparent, touch-transparent window that floats above everything the app draws.
-final class GlitchWindow: UIWindow {
-  let lineView = GlitchLineView()
+final class CrackWindow: UIWindow {
+  let lineView = CrackLineView()
 
   override init(windowScene: UIWindowScene) {
     super.init(windowScene: windowScene)
     windowLevel = UIWindow.Level(rawValue: UIWindow.Level.alert.rawValue + 1000)
     backgroundColor = .clear
     isUserInteractionEnabled = false
-    let controller = GlitchViewController()
+    let controller = CrackViewController()
     controller.view = lineView
     rootViewController = controller
   }
@@ -203,8 +203,8 @@ final class GlitchWindow: UIWindow {
 }
 
 /// Forwards status bar and home indicator preferences to the app's own view controllers,
-/// so the overlay never changes how the app looks (apart from the glitch, obviously).
-final class GlitchViewController: UIViewController {
+/// so the overlay never changes how the app looks (apart from the crack, obviously).
+final class CrackViewController: UIViewController {
   override var prefersStatusBarHidden: Bool {
     return appViewController?.prefersStatusBarHidden ?? false
   }
@@ -236,8 +236,8 @@ final class GlitchViewController: UIViewController {
 }
 
 /// Draws the line: a soft glow, a banded bright core, a bloom where it meets the fold and an optional crease.
-final class GlitchLineView: UIView {
-  var style = GlitchStyle() {
+final class CrackLineView: UIView {
+  var style = CrackStyle() {
     didSet {
       applyStyle()
       setNeedsLayout()
@@ -336,8 +336,8 @@ final class GlitchLineView: UIView {
   private func applyStyle() {
     let base = style.color
     let white = UIColor(red: 1, green: 1, blue: 1, alpha: 1)
-    let hot = base.glitchBlended(with: white, fraction: 0.8)
-    let mid = base.glitchBlended(with: white, fraction: 0.35)
+    let hot = base.crackBlended(with: white, fraction: 0.8)
+    let mid = base.crackBlended(with: white, fraction: 0.35)
 
     coreLayer.colors = [hot, mid, base, hot, mid, base.withAlphaComponent(0.9)].map { $0.cgColor }
     coreLayer.locations = [0, 0.08, 0.25, 0.4, 0.7, 1]
@@ -353,7 +353,7 @@ final class GlitchLineView: UIView {
     bloomLayer.locations = [0, 0.35, 1]
 
     let creaseTint = UIColor(red: 0.85, green: 1.0, blue: 0.3, alpha: 1.0)
-    let crease = base.glitchBlended(with: creaseTint, fraction: 0.5)
+    let crease = base.crackBlended(with: creaseTint, fraction: 0.5)
     creaseLayer.colors = [
       crease.withAlphaComponent(0).cgColor,
       crease.withAlphaComponent(0.85).cgColor,
@@ -366,7 +366,7 @@ final class GlitchLineView: UIView {
   }
 
   @objc private func applyFlicker() {
-    layer.removeAnimation(forKey: "glitch.flicker")
+    layer.removeAnimation(forKey: "crack.flicker")
     guard style.flicker, !UIAccessibility.isReduceMotionEnabled else {
       layer.opacity = 1
       return
@@ -376,19 +376,19 @@ final class GlitchLineView: UIView {
     animation.calculationMode = .discrete
     animation.duration = 3.1
     animation.repeatCount = .infinity
-    layer.add(animation, forKey: "glitch.flicker")
+    layer.add(animation, forKey: "crack.flicker")
   }
 }
 
 #else
 
 /// tvOS has no fold, no green line and no status bar to protect: the API exists but does nothing.
-final class GlitchOverlay {
-  static let shared = GlitchOverlay()
+final class CrackOverlay {
+  static let shared = CrackOverlay()
   static var autoStartEnabled: Bool { return false }
 
   private(set) var isEnabled = false
-  private(set) var style = GlitchStyle()
+  private(set) var style = CrackStyle()
 
   private init() {}
 
@@ -396,19 +396,19 @@ final class GlitchOverlay {
     isEnabled = enabled
   }
 
-  func update(_ change: @escaping (inout GlitchStyle) -> Void) {
+  func update(_ change: @escaping (inout CrackStyle) -> Void) {
     change(&style)
   }
 
   func reset() {
-    style = GlitchStyle()
+    style = CrackStyle()
   }
 }
 
 #endif
 
 extension UIColor {
-  func glitchBlended(with other: UIColor, fraction: CGFloat) -> UIColor {
+  func crackBlended(with other: UIColor, fraction: CGFloat) -> UIColor {
     var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
     var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
     getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
@@ -423,7 +423,7 @@ extension UIColor {
   }
 
   /// Parses `#RGB`, `#RRGGBB` and `#RRGGBBAA` (the `#` is optional).
-  convenience init?(glitchHex hexString: String) {
+  convenience init?(crackHex hexString: String) {
     var hex = hexString.trimmingCharacters(in: .whitespacesAndNewlines)
     if hex.hasPrefix("#") {
       hex.removeFirst()

@@ -1,26 +1,26 @@
-import type { GlitchOptions } from './ExpoGlitch.types';
-import ExpoGlitchModule from './ExpoGlitchModule';
+import type { CrackOptions } from './ExpoCrack.types';
+import ExpoCrackModule from './ExpoCrackModule';
 
-export * from './ExpoGlitch.types';
+export * from './ExpoCrack.types';
 
 let warned = false;
 
 function native() {
-  if (!ExpoGlitchModule && !warned) {
+  if (!ExpoCrackModule && !warned) {
     warned = true;
     console.warn(
-      '[expo-glitch] The native module is not available. The green line needs a development build ' +
-        '(it does not run in Expo Go), so rebuild your app after installing expo-glitch.'
+      '[expo-crack] The native module is not available. The green line needs a development build ' +
+        '(it does not run in Expo Go), so rebuild your app after installing expo-crack.'
     );
   }
-  return ExpoGlitchModule;
+  return ExpoCrackModule;
 }
 
 /**
  * Shows the green line. It is already on when the app starts, so you only need this after `disable()`.
  * Pass options to restyle it in the same call.
  */
-export function enable(options?: GlitchOptions): void {
+export function enable(options?: CrackOptions): void {
   if (options) {
     configure(options);
   }
@@ -45,7 +45,7 @@ export function isEnabled(): boolean {
 }
 
 /** Restyles the line. Only the options you pass change; the rest keep their current values. */
-export function configure(options: GlitchOptions): void {
+export function configure(options: CrackOptions): void {
   native()?.configure(options);
 }
 
@@ -54,6 +54,6 @@ export function reset(): void {
   native()?.reset();
 }
 
-const Glitch = { enable, disable, toggle, isEnabled, configure, reset };
+const Crack = { enable, disable, toggle, isEnabled, configure, reset };
 
-export default Glitch;
+export default Crack;

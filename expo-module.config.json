@@ -1,10 +1,10 @@
 {
   "platforms": ["apple", "android", "web"],
   "apple": {
-    "modules": ["ExpoGlitchModule"],
-    "appDelegateSubscribers": ["ExpoGlitchAppDelegateSubscriber"]
+    "modules": ["ExpoCrackModule"],
+    "appDelegateSubscribers": ["ExpoCrackAppDelegateSubscriber"]
   },
   "android": {
-    "modules": ["expo.modules.glitch.ExpoGlitchModule"]
+    "modules": ["expo.modules.crack.ExpoCrackModule"]
   }
 }

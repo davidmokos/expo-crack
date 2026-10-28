@@ -3,8 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "expo-glitch": ["../src/index"],
-      "expo-glitch/*": ["../src/*"]
+      "expo-crack": ["../src/index"],
+      "expo-crack/*": ["../src/*"]
     }
   }
 }

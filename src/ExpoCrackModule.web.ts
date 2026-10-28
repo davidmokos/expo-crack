@@ -1,12 +1,12 @@
 import { NativeModule, registerWebModule } from 'expo';
 
-import type { GlitchOptions, GlitchSide } from './ExpoGlitch.types';
+import type { CrackOptions, CrackSide } from './ExpoCrack.types';
 
 type Style = {
   y: number;
   thickness: number;
   color: string;
-  side: GlitchSide;
+  side: CrackSide;
   crease: boolean;
   flicker: boolean;
 };
@@ -20,7 +20,7 @@ const DEFAULT_STYLE: Style = {
   flicker: true,
 };
 
-const STYLE_ID = 'expo-glitch-style';
+const STYLE_ID = 'expo-crack-style';
 
 function ensureKeyframes() {
   if (document.getElementById(STYLE_ID)) {
@@ -29,19 +29,19 @@ function ensureKeyframes() {
   const style = document.createElement('style');
   style.id = STYLE_ID;
   style.textContent = `
-@keyframes expo-glitch-flicker {
+@keyframes expo-crack-flicker {
   0%, 15%, 25%, 49%, 51%, 65%, 67%, 100% { opacity: 1; }
   16%, 24% { opacity: 0.82; }
   50% { opacity: 0.9; }
   66% { opacity: 0.7; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .expo-glitch { animation: none !important; }
+  .expo-crack { animation: none !important; }
 }`;
   document.head.appendChild(style);
 }
 
-class ExpoGlitchModule extends NativeModule {
+class ExpoCrackModule extends NativeModule {
   private style: Style = { ...DEFAULT_STYLE };
   private enabled = false;
   private root: HTMLDivElement | null = null;
@@ -63,7 +63,7 @@ class ExpoGlitchModule extends NativeModule {
     return this.enabled;
   }
 
-  configure(options: GlitchOptions): void {
+  configure(options: CrackOptions): void {
     this.style = {
       y: options.y ?? this.style.y,
       thickness: options.thickness ?? this.style.thickness,
@@ -93,7 +93,7 @@ class ExpoGlitchModule extends NativeModule {
 
     if (!this.root) {
       this.root = document.createElement('div');
-      this.root.className = 'expo-glitch';
+      this.root.className = 'expo-crack';
       document.body.appendChild(this.root);
     }
     const root = this.root;
@@ -102,7 +102,7 @@ class ExpoGlitchModule extends NativeModule {
       'inset: 0',
       'pointer-events: none',
       'z-index: 2147483647',
-      flicker ? 'animation: expo-glitch-flicker 3.1s steps(1, end) infinite' : '',
+      flicker ? 'animation: expo-crack-flicker 3.1s steps(1, end) infinite' : '',
     ].join(';');
 
     const left = side === 'left' ? '0' : '50%';
@@ -120,9 +120,9 @@ class ExpoGlitchModule extends NativeModule {
   }
 }
 
-const webModule = registerWebModule(ExpoGlitchModule, 'ExpoGlitchModule');
+const webModule = registerWebModule(ExpoCrackModule, 'ExpoCrackModule');
 
-// The glitch is on by default, just like on a real iPhone Duo.
+// The crack is on by default, just like on a real iPhone Duo.
 if (typeof document !== 'undefined') {
   webModule.setEnabled(true);
 }

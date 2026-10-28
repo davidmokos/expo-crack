@@ -1,7 +1,7 @@
 /** Which half of the screen the line crosses. The authentic one is `'right'`. */
-export type GlitchSide = 'left' | 'right' | 'full';
+export type CrackSide = 'left' | 'right' | 'full';
 
-export type GlitchOptions = {
+export type CrackOptions = {
   /**
    * Vertical position of the line as a fraction of the screen height (0 = top, 1 = bottom).
    * @default 0.62
@@ -21,7 +21,7 @@ export type GlitchOptions = {
    * Which half of the screen the line crosses, starting at the fold.
    * @default 'right'
    */
-  side?: GlitchSide;
+  side?: CrackSide;
   /**
    * Also draw the faint vertical line along the fold.
    * @default false

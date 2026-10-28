@@ -1,11 +1,11 @@
-# expo-glitch
+# expo-crack
 
 The iPhone Duo green line glitch, as an Expo module.
 
 Every new iPhone Duo seems to come with a bright green line across the right half of the inner display. Some people get it on day one, some after a week. Your app, built with Expo, has been missing it. Until now.
 
 ```sh
-npx expo install expo-glitch
+npx expo install expo-crack
 ```
 
 Rebuild your app and that's it. The line is on by default. No code, no setup, no warranty.
@@ -34,16 +34,16 @@ Rebuild your app and that's it. The line is on by default. No code, no setup, no
 You don't need any code. But if you want control:
 
 ```ts
-import Glitch from 'expo-glitch';
+import Crack from 'expo-crack';
 
-Glitch.disable(); // coward
-Glitch.enable(); // welcome back
+Crack.disable(); // coward
+Crack.enable(); // welcome back
 
-Glitch.toggle(); // returns the new state
-Glitch.isEnabled();
+Crack.toggle(); // returns the new state
+Crack.isEnabled();
 
 // Restyle it. Only the options you pass change.
-Glitch.configure({
+Crack.configure({
   y: 0.62, // vertical position, as a fraction of the screen height
   thickness: 3, // in points
   color: '#61FFCC', // #RGB, #RRGGBB or #RRGGBBAA
@@ -53,19 +53,19 @@ Glitch.configure({
   hideWhenFolded: true, // iPhone Duo: show it on the open inner display only
 });
 
-Glitch.reset(); // factory settings
+Crack.reset(); // factory settings
 ```
 
-Named exports work too: `import { enable, disable, configure } from 'expo-glitch'`.
+Named exports work too: `import { enable, disable, configure } from 'expo-crack'`.
 
 ### Start without the line
 
-Add the config plugin with `autoStart: false` and the app launches clean. You can still call `Glitch.enable()` later, for example on a user's birthday.
+Add the config plugin with `autoStart: false` and the app launches clean. You can still call `Crack.enable()` later, for example on a user's birthday.
 
 ```json
 {
   "expo": {
-    "plugins": [["expo-glitch", { "autoStart": false }]]
+    "plugins": [["expo-crack", { "autoStart": false }]]
   }
 }
 ```

@@ -1,6 +1,6 @@
 import ExpoModulesCore
 
-struct GlitchOptions: Record {
+struct CrackOptions: Record {
   @Field var y: Double?
   @Field var thickness: Double?
   @Field var color: String?
@@ -10,28 +10,28 @@ struct GlitchOptions: Record {
   @Field var hideWhenFolded: Bool?
 }
 
-public class ExpoGlitchModule: Module {
+public class ExpoCrackModule: Module {
   public func definition() -> ModuleDefinition {
-    Name("ExpoGlitch")
+    Name("ExpoCrack")
 
     OnCreate {
-      if GlitchOverlay.autoStartEnabled {
-        GlitchOverlay.shared.setEnabled(true)
+      if CrackOverlay.autoStartEnabled {
+        CrackOverlay.shared.setEnabled(true)
       }
     }
 
     Function("setEnabled") { (enabled: Bool) in
-      GlitchOverlay.shared.setEnabled(enabled)
+      CrackOverlay.shared.setEnabled(enabled)
     }
 
     Function("isEnabled") { () -> Bool in
-      return GlitchOverlay.shared.isEnabled
+      return CrackOverlay.shared.isEnabled
     }
 
-    Function("configure") { (options: GlitchOptions) in
-      let color = options.color.flatMap { UIColor(glitchHex: $0) }
-      let side = options.side.flatMap { GlitchStyle.Side(rawValue: $0) }
-      GlitchOverlay.shared.update { style in
+    Function("configure") { (options: CrackOptions) in
+      let color = options.color.flatMap { UIColor(crackHex: $0) }
+      let side = options.side.flatMap { CrackStyle.Side(rawValue: $0) }
+      CrackOverlay.shared.update { style in
         if let y = options.y {
           style.y = CGFloat(y)
         }
@@ -57,7 +57,7 @@ public class ExpoGlitchModule: Module {
     }
 
     Function("reset") {
-      GlitchOverlay.shared.reset()
+      CrackOverlay.shared.reset()
     }
   }
 }

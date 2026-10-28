@@ -1,4 +1,4 @@
-package expo.modules.glitch
+package expo.modules.crack
 
 import android.app.Activity
 import android.content.Context
@@ -6,25 +6,25 @@ import android.os.Bundle
 import expo.modules.core.interfaces.Package
 import expo.modules.core.interfaces.ReactActivityLifecycleListener
 
-/** Turns the glitch on when the activity is created, before any JavaScript runs. Installing the package is enough. */
-class ExpoGlitchPackage : Package {
+/** Turns the crack on when the activity is created, before any JavaScript runs. Installing the package is enough. */
+class ExpoCrackPackage : Package {
   override fun createReactActivityLifecycleListeners(activityContext: Context): List<ReactActivityLifecycleListener> {
-    return listOf(ExpoGlitchActivityLifecycleListener())
+    return listOf(ExpoCrackActivityLifecycleListener())
   }
 }
 
-class ExpoGlitchActivityLifecycleListener : ReactActivityLifecycleListener {
+class ExpoCrackActivityLifecycleListener : ReactActivityLifecycleListener {
   override fun onCreate(activity: Activity, savedInstanceState: Bundle?) {
-    if (GlitchOverlay.autoStartEnabled(activity)) {
-      GlitchOverlay.setEnabled(activity, true)
+    if (CrackOverlay.autoStartEnabled(activity)) {
+      CrackOverlay.setEnabled(activity, true)
     }
   }
 
   override fun onResume(activity: Activity) {
-    GlitchOverlay.attach(activity)
+    CrackOverlay.attach(activity)
   }
 
   override fun onDestroy(activity: Activity) {
-    GlitchOverlay.onActivityDestroyed(activity)
+    CrackOverlay.onActivityDestroyed(activity)
   }
 }

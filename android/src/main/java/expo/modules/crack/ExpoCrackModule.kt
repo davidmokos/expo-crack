@@ -1,11 +1,11 @@
-package expo.modules.glitch
+package expo.modules.crack
 
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
 
-class GlitchOptions : Record {
+class CrackOptions : Record {
   @Field val y: Double? = null
   @Field val thickness: Double? = null
   @Field val color: String? = null
@@ -15,26 +15,26 @@ class GlitchOptions : Record {
   @Field val hideWhenFolded: Boolean? = null
 }
 
-class ExpoGlitchModule : Module() {
+class ExpoCrackModule : Module() {
   override fun definition() = ModuleDefinition {
-    Name("ExpoGlitch")
+    Name("ExpoCrack")
 
     OnActivityEntersForeground {
-      GlitchOverlay.attach(appContext.currentActivity)
+      CrackOverlay.attach(appContext.currentActivity)
     }
 
     Function("setEnabled") { enabled: Boolean ->
-      GlitchOverlay.setEnabled(appContext.currentActivity, enabled)
+      CrackOverlay.setEnabled(appContext.currentActivity, enabled)
     }
 
     Function("isEnabled") {
-      GlitchOverlay.isEnabled
+      CrackOverlay.isEnabled
     }
 
-    Function("configure") { options: GlitchOptions ->
-      val color = options.color?.let { GlitchStyle.parseColor(it) }
+    Function("configure") { options: CrackOptions ->
+      val color = options.color?.let { CrackStyle.parseColor(it) }
       val side = options.side?.takeIf { it == "left" || it == "right" || it == "full" }
-      GlitchOverlay.update { current ->
+      CrackOverlay.update { current ->
         current.copy(
           y = options.y?.toFloat() ?: current.y,
           thickness = options.thickness?.toFloat() ?: current.thickness,
@@ -47,7 +47,7 @@ class ExpoGlitchModule : Module() {
     }
 
     Function("reset") {
-      GlitchOverlay.reset()
+      CrackOverlay.reset()
     }
   }
 }

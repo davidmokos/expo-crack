@@ -1,5 +1,5 @@
 {
-  "name": "expo-glitch",
+  "name": "expo-crack",
   "version": "0.1.0",
   "description": "The iPhone Duo green line glitch, as an Expo module",
   "main": "build/index.js",
@@ -16,20 +16,20 @@
   "keywords": [
     "react-native",
     "expo",
-    "expo-glitch",
+    "expo-crack",
     "iphone-duo",
     "foldable",
     "glitch",
     "green-line",
     "joke"
   ],
-  "repository": "https://github.com/davidmokos/expo-glitch",
+  "repository": "https://github.com/davidmokos/expo-crack",
   "bugs": {
-    "url": "https://github.com/davidmokos/expo-glitch/issues"
+    "url": "https://github.com/davidmokos/expo-crack/issues"
   },
   "author": "David Mokos <mokos@expo.dev>",
   "license": "MIT",
-  "homepage": "https://github.com/davidmokos/expo-glitch#readme",
+  "homepage": "https://github.com/davidmokos/expo-crack#readme",
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.26.0",

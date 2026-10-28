@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "expo-glitch example",
+    "name": "expo-crack example",
     "slug": "expo-glitch-example",
     "version": "1.0.0",
     "orientation": "default",
@@ -8,7 +8,7 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.glitch.example"
+      "bundleIdentifier": "expo.modules.crack.example"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,12 +18,12 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "expo.modules.glitch.example"
+      "package": "expo.modules.crack.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "scheme": "expoglitch",
+    "scheme": "expocrack",
     "backgroundColor": "#0e0f1a",
     "experiments": {
       "autolinkingModuleResolution": true

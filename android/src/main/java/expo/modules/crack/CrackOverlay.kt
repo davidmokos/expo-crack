@@ -1,4 +1,4 @@
-package expo.modules.glitch
+package expo.modules.crack
 
 import android.animation.ValueAnimator
 import android.app.Activity
@@ -16,8 +16,8 @@ import android.view.View
 import android.view.ViewGroup
 import java.lang.ref.WeakReference
 
-/** Visual configuration of the glitch line. Mirrors `GlitchOptions` on the JS side. */
-data class GlitchStyle(
+/** Visual configuration of the crack line. Mirrors `CrackOptions` on the JS side. */
+data class CrackStyle(
   /** Vertical position of the line as a fraction of the screen height. */
   val y: Float = 0.62f,
   /** Thickness of the bright core, in dp. */
@@ -55,22 +55,22 @@ data class GlitchStyle(
 }
 
 /** Owns the overlay view and keeps it attached to the current activity. */
-object GlitchOverlay {
-  private const val META_DATA_KEY = "expo.modules.glitch.AUTO_START"
+object CrackOverlay {
+  private const val META_DATA_KEY = "expo.modules.crack.AUTO_START"
 
   @Volatile
   var isEnabled: Boolean = false
     private set
 
   @Volatile
-  var style: GlitchStyle = GlitchStyle()
+  var style: CrackStyle = CrackStyle()
     private set
 
-  private var view: GlitchLineView? = null
+  private var view: CrackLineView? = null
   private var host: WeakReference<Activity>? = null
   private val mainHandler = Handler(Looper.getMainLooper())
 
-  /** Reads the `expo.modules.glitch.AUTO_START` meta-data written by the config plugin. Defaults to true. */
+  /** Reads the `expo.modules.crack.AUTO_START` meta-data written by the config plugin. Defaults to true. */
   fun autoStartEnabled(context: Context): Boolean {
     return try {
       val info = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
@@ -92,7 +92,7 @@ object GlitchOverlay {
     }
   }
 
-  fun update(change: (GlitchStyle) -> GlitchStyle) {
+  fun update(change: (CrackStyle) -> CrackStyle) {
     style = change(style)
     runOnMain {
       view?.style = style
@@ -100,10 +100,10 @@ object GlitchOverlay {
   }
 
   fun reset() {
-    update { GlitchStyle() }
+    update { CrackStyle() }
   }
 
-  /** Attaches the overlay to the given activity (or the last known one) when the glitch is enabled. */
+  /** Attaches the overlay to the given activity (or the last known one) when the crack is enabled. */
   fun attach(activity: Activity?) {
     runOnMain {
       if (!isEnabled) {
@@ -117,7 +117,7 @@ object GlitchOverlay {
         return@runOnMain
       }
       (current?.parent as? ViewGroup)?.removeView(current)
-      val lineView = GlitchLineView(target).also { it.style = style }
+      val lineView = CrackLineView(target).also { it.style = style }
       decor.addView(lineView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
       view = lineView
       host = WeakReference(target)
@@ -150,8 +150,8 @@ object GlitchOverlay {
 }
 
 /** Draws the line: a soft glow, a banded bright core and an optional crease. Touches pass through. */
-class GlitchLineView(context: Context) : View(context) {
-  var style: GlitchStyle = GlitchStyle()
+class CrackLineView(context: Context) : View(context) {
+  var style: CrackStyle = CrackStyle()
     set(value) {
       field = value
       invalidate()

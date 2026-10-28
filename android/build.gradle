@@ -3,11 +3,11 @@ plugins {
   id 'expo-module-gradle-plugin'
 }
 
-group = 'expo.modules.glitch'
+group = 'expo.modules.crack'
 version = '0.1.0'
 
 android {
-  namespace "expo.modules.glitch"
+  namespace "expo.modules.crack"
   defaultConfig {
     versionCode 1
     versionName "0.1.0"
